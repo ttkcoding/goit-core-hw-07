@@ -132,11 +132,33 @@ def show_contact(args, book: AddressBook):
         raise IndexError
     name = args[0]
     record = book.find(name)
+
     if record:
         return str(record)
     else: 
         raise KeyError
     
 def show_all_contacts(book: AddressBook):
+    if not book.data:
+        return "No contacts found"
     all_contacts = [str(record) for record in book.data.values()]
-    return "\n".join(all_contacts)
+    return "\n\n".join(all_contacts)
+
+def add_birthday(args, book: AddressBook):
+    name, birthday_str, *_ = args
+    record = book.find(name)
+    message = "Contact updated."
+
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
+        message = "Contact added."
+    try:
+        birthday = Birthday(birthday_str)
+        record.add_birthday(birthday)
+    except ValueError as e:
+        raise ValueError(f"Error adding birthday: {e}")
+    
+    return message
+
+def 
