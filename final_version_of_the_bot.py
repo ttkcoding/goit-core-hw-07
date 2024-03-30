@@ -92,8 +92,22 @@ class AddressBook(UserDict):
                     congratulation_date = current_date + timedelta(days=days_to_birthday)
                     congratulation_list.append({"name": name, "congratulation_date": congratulation_date})
         return congratulation_list
-    
 
+
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "Give me name and phone please."
+        except IndexError:
+            return "Enter contact Name please."
+        except KeyError:
+            return "Contact not found"
+
+    return inner
+  
+@input_error
 def add_contact(args, book: AddressBook):
     name, phone, *_ = args
     record = book.find(name)
@@ -109,6 +123,7 @@ def add_contact(args, book: AddressBook):
 
     return message
 
+@input_error
 def change_contact(args, book: AddressBook):
     name, new_phone, *_ = args
     record = book.find(name)
@@ -127,6 +142,7 @@ def change_contact(args, book: AddressBook):
 
     return message
 
+@input_error
 def show_contact(args, book: AddressBook):
     if len(args) != 1:
         raise IndexError
@@ -144,6 +160,7 @@ def show_all_contacts(book: AddressBook):
     all_contacts = [str(record) for record in book.data.values()]
     return "\n\n".join(all_contacts)
 
+@input_error
 def add_birthday(args, book: AddressBook):
     name, birthday_str, *_ = args
     record = book.find(name)
@@ -161,4 +178,66 @@ def add_birthday(args, book: AddressBook):
     
     return message
 
-def 
+@input_error
+def show_birthday(args, book: AddressBook):
+    name = args[0]
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+
+    if record.birthday:
+        return f"{name}'s birthday is on {record.birthday.value}"
+    else:
+        return f"No birthday information for {name}."
+    
+def next_week_birthday(book: AddressBook):
+    upcoming_birthdays = book.get_upcoming_birthdays()
+    if upcoming_birthdays:
+        return "\n".join([f"{item['name']}'s birthday is on {item['congratulation_date'].strftime('%d.%m.%Y')}" for item in upcoming_birthdays])
+    else:
+        return "No birthdays in the next week."
+
+def parse_input(user_input):
+    cmd, *args = user_input.split()
+    cmd = cmd.strip().lower()
+    return cmd, *args
+
+
+def main():
+    book = AddressBook()
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ")
+        command, *args = parse_input(user_input)
+
+        if command in ["close", "exit"]:
+            print("Good bye!")
+            break
+
+        elif command == "hello":
+            print("How can I help you?")
+
+        elif command == "add":
+            print(add_contact(args, book))
+
+        elif command == "change":
+            print(change_contact(args, book))
+
+        elif command == "phone":
+            print(show_contact(args, book))
+
+        elif command == "all":
+            print(show_all_contacts(book))
+
+        elif command == "add-birthday":
+            print(add_birthday(args, book))
+
+        elif command == "show-birthday":
+            print(show_birthday(args, book))
+
+        elif command == "birthdays":
+            print(next_week_birthday(book))    
+
+        else:
+            print("Invalid command.")
