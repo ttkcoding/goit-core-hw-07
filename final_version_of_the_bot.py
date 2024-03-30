@@ -82,7 +82,7 @@ class AddressBook(UserDict):
         for name, record in self.data.items():
             if record.birthday:
                 birthday = record.birthday.date
-                birthday_this_year = birthday.replace(year=current_date.year)
+                birthday_this_year = birthday.replace(year=current_date.year).date()
                 if birthday_this_year < current_date:
                     birthday_this_year = birthday_this_year.replace(year=current_date.year + 1)
                 days_to_birthday = (birthday_this_year - current_date).days
