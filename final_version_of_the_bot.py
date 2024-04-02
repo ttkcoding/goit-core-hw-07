@@ -1,7 +1,7 @@
 from collections import UserDict
 from datetime import datetime, timedelta
 
-
+# Base class for different types of fields in a record
 class Field:
     def __init__(self, value):
         self.value = value
@@ -9,11 +9,11 @@ class Field:
     def __str__(self):
         return str(self.value)
     
-
+# Class for storing a contact's name
 class Name(Field):
     pass
 
-
+# Class for storing a contact's phone number
 class Phone(Field):
     def __init__(self, value):
         if isinstance(value, str) and value.isdigit() and len(value) == 10:
@@ -21,7 +21,7 @@ class Phone(Field):
         else:
             raise ValueError("Number is too short")
         
-
+# Class for storing a contact's birthday
 class Birthday(Field):
     def __init__(self, value):
         try:
@@ -30,7 +30,7 @@ class Birthday(Field):
         except ValueError:
             raise ValueError(f"Value '{value}' is not a valid date in the format DD.MM.YYYY")
         
-
+# Class for record a contact's information
 class Record:
     def __init__(self, name):
         self.name = Name(name)
@@ -64,7 +64,7 @@ class Record:
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
     
-
+# Class for storing a collection of contacts
 class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
@@ -93,7 +93,7 @@ class AddressBook(UserDict):
                     congratulation_list.append({"name": name, "congratulation_date": congratulation_date})
         return congratulation_list
 
-
+# Decorator for handling errors in command functions
 def input_error(func):
     def inner(*args, **kwargs):
         try:
@@ -106,7 +106,8 @@ def input_error(func):
             return "Contact not found"
 
     return inner
-  
+
+# Command function to add a new contact
 @input_error
 def add_contact(args, book: AddressBook):
     name, phone, *_ = args
@@ -123,6 +124,7 @@ def add_contact(args, book: AddressBook):
 
     return message
 
+# Command function to change a contact's phone number
 @input_error
 def change_contact(args, book: AddressBook):
     name, new_phone, *_ = args
@@ -142,6 +144,7 @@ def change_contact(args, book: AddressBook):
 
     return message
 
+# Command function to show a contact's phone number
 @input_error
 def show_contact(args, book: AddressBook):
     if len(args) != 1:
@@ -153,13 +156,15 @@ def show_contact(args, book: AddressBook):
         return str(record)
     else: 
         raise KeyError
-    
+
+# Command function to show all contacts    
 def show_all_contacts(book: AddressBook):
     if not book.data:
         return "No contacts found"
     all_contacts = [str(record) for record in book.data.values()]
     return "\n\n".join(all_contacts)
 
+# Command function to add a birthday to a contact
 @input_error
 def add_birthday(args, book: AddressBook):
     name, birthday_str, *_ = args
@@ -178,6 +183,7 @@ def add_birthday(args, book: AddressBook):
     
     return message
 
+# Command function to show a contact's birthday
 @input_error
 def show_birthday(args, book: AddressBook):
     name = args[0]
@@ -190,7 +196,8 @@ def show_birthday(args, book: AddressBook):
         return f"{name}'s birthday is on {record.birthday.value}"
     else:
         return f"No birthday information for {name}."
-    
+
+# Command function to show birthdays in the next week  
 def next_week_birthday(book: AddressBook):
     upcoming_birthdays = book.get_upcoming_birthdays()
     if upcoming_birthdays:
@@ -198,12 +205,13 @@ def next_week_birthday(book: AddressBook):
     else:
         return "No birthdays in the next week."
 
+# Function to parse user input into command and arguments
 def parse_input(user_input):
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
 
-
+# Main loop of the program
 def main():
     book = AddressBook()
     print("Welcome to the assistant bot!")
